@@ -1,0 +1,83 @@
+---
+title: "Stock Returns Analysis"
+output:
+  pdf_document: default
+  html_document: default
+date: "2023-07-01"
+---
+
+```{r}
+library("quantmod")
+library('car')
+library('tidyverse')
+library('MASS')
+library('moments')
+library('ggpubr')
+```
+
+```{r}
+
+# Generate a sequence of x values
+x <- seq(-10, 10, by = 0.01)
+
+# Compute the density values for the normal distribution
+density <- dnorm(x, mean = 0, sd = 1)
+plot(x, density, type = "l", lwd = 2, xlab = "x", ylab = "Density",
+     main = "Density Function of Normal Distribution")
+data <- data.frame(x = x, density = density)
+
+kurt <- kurtosis(data$x)
+skew <- skewness(data$x)
+
+print(paste("Kurtosis:", kurt))
+print(paste("Skewness:", skew))
+
+```
+
+```{r}
+getSymbols("^GSPC",src='yahoo',from=Sys.Date()-3650,
+           to=Sys.Date())
+GSPC <- na.omit(GSPC)
+GSPC$GSPC.Ret = diff(GSPC$GSPC.Adjusted)/lag(GSPC$GSPC.Adjusted)
+plot(GSPC$GSPC.Ret)
+hist(GSPC$GSPC.Ret)
+boxplot(GSPC$GSPC.Ret)
+
+mean_GSPC <- mean(GSPC$GSPC.Ret)
+sd_GSPC <- sd(GSPC$GSPC.Ret)
+
+#x <- seq(min(GSPC$GSPC.Ret), max(GSPC$GSPC.Ret), length = 100)
+#y <- dnorm(x, mean = mean_data, sd = sd_data)
+#lines(x, y, col = "red", lwd = 2)
+
+```
+
+
+```{r}
+
+#qplot(returns,data='GSPC$GSPC.Ret')
+GSPC <- na.omit(GSPC)
+d <- density(GSPC$GSPC.Ret)
+plot(d)
+```
+
+```{r}
+fit <- fitdistr(GSPC$GSPC.Ret, densfun = "normal")
+
+estimated_mean <- fit$estimate[1]
+estimated_sd <- fit$estimate[2]
+
+# Calculate the kurtosis and skewness
+kurt <- kurtosis(GSPC$GSPC.Ret)
+skew <- skewness(GSPC$GSPC.Ret)
+
+# Print the kurtosis and skewness values
+print(paste("Kurtosis:", kurt))
+print(paste("Skewness:", skew))
+
+```
+
+```{r}
+qqPlot(GSPC$GSPC.Ret)
+
+```
